@@ -4,7 +4,7 @@ import sys
 
 
 class SingleButton(QPushButton):
-    def __init__(self,Name="btn",position="00"): #00 is top left
+    def __init__(self,Name="btn",position="00",parent=None): #00 is top left
         super().__init__()
         
         self.position = position
@@ -21,6 +21,7 @@ class SingleButton(QPushButton):
         border: 1px solid black;
         border-radius: 5px;
         font-size: 30px;
+        font-weight: bold;
         }
         QPushButton:hover {
         background-color: rgba(155,155,155,0.7);
