@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import QApplication, QWidget,QPushButton,QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget,QGridLayout
 import sys
 from singleButton import SingleButton
 
