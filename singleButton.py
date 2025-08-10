@@ -4,7 +4,7 @@ import sys
 
 
 class SingleButton(QPushButton):
-    def __init__(self,Name="btn",position="00",parent=None): #00 is top left
+    def __init__(self,Name="btn00",position="00",parent=None): #btn00 in position 00 means it is top left button in top left singleBoard
         super().__init__()
         
         self.position = position
