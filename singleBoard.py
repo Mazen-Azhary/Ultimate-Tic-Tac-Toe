@@ -1,9 +1,58 @@
-
-from PyQt5.QtWidgets import QApplication, QWidget,QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget,QPushButton,QGridLayout
+from PyQt5.QtCore import pyqtSignal
 import sys
-from singleButton import SingleButton
+
+class SingleButton(QPushButton):
+    clickedSignal = pyqtSignal(str, str)  # class attribute, correct PyQt usage
+    def __init__(self,Name="btn00",position="00",parent=None):
+        super().__init__()
+        self.position = position
+        self.buttonName = Name
+        self.clicked.connect(lambda: self.on_button_click())  # Fix: always call with no bool argument
+        self.clickable = True
+        # self.setFixedHeight(60)
+        # self.setFixedWidth(60)
+        styleSh = """
+        QPushButton {
+        width:30%;
+        height:30%;
+        background-color: rgba(255,255,255,0.7);
+        border: 1px solid black;
+        border-radius: 5px;
+        font-size: 30px;
+        font-weight: bold;
+        }
+        QPushButton:hover {
+        background-color: rgba(155,155,155,0.7);
+            }
+            """
+        self.setStyleSheet(styleSh)  
+    def on_button_click(self,player="X"):
+        if self.clickable == False or self.text() != "":
+            return -1    
+        self.clickable = False
+        if player == "X":
+            self.setText("X")
+        else:
+            self.setText("O")
+        styleSh = """
+        QPushButton {
+        width:30%;
+        height:30%;
+        background-color: rgba(170,170,170,0.7);
+        border: 1px solid black;
+        border-radius: 5px;
+        font-size: 30px;
+       }
+        QPushButton:hover {
+        background-color: rgba(155,155,155,0.7);
+            }
+            """
+        self.setStyleSheet(styleSh)
+        self.clickedSignal.emit(self.position,player)  # Emit the signal with the position
 
 class SingleBoard(QWidget):
+    conqueredSignal = pyqtSignal(str, str)  # class attribute, correct PyQt usage
     def __init__(self, Name="board00",boardPosition="01"): 
         super().__init__()
         self.boardName = Name
@@ -20,6 +69,7 @@ class SingleBoard(QWidget):
                 button = SingleButton(Name=f"btn{row}{col} ", position=boardPosition, parent=self)
                 button.setFixedSize(100, 100)
                 layout.addWidget(button, row, col)
+                button.clickedSignal.connect(self.conquerButton)  # Connect the signal to the conquerButton method
         self.score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]] #this will keep track of the score of this board , if we have 3 1's or 0's here we will signal for larger board to indicate this as conquered
         
     def isActive(self):
@@ -44,19 +94,21 @@ class SingleBoard(QWidget):
                 button.clickable = False
         self.setStyleSheet("background-color: rgba(155,155,155,0.8);border: 2px solid black;border-radius: 5px;")
     def conquerButton(self,position="00",player="X"):
-        button = self.layout().itemAtPosition(int(position[0]), int(position[1])).widget()
-        if self.score[int(position[0])][int(position[1])] == 0 or self.score[int(position[0])][int(position[1])] == 1:
-            return False #already pressed
+        # position = button.on_button_click(player)
+        # if  position == -1 or not self.isActive():
+        #     return -1
+        # button = self.layout().itemAtPosition(int(position[0]), int(position[1])).widget()
+        # if self.score[int(position[0])][int(position[1])] == 0 or self.score[int(position[0])][int(position[1])] == 1:
+        #     return -1 #already pressed
         
         if player=="X":
-            button.setText("X")
             self.score[int(position[0])][int(position[1])] = 1
         elif player=="O":
-            button.setText("X")
             self.score[int(position[0])][int(position[1])] = 0
+        self.setInActive()
         if(self.checkForCompletion(player,position))==True:
-            return True
-        return False        
+            self.conqueredSignal.emit(position, player)
+        return 0            
     def checkForCompletion(self,player="X",position="00"):
         checkValue = -1
         if player=="X":
@@ -89,4 +141,3 @@ if __name__ == "__main__":
     window.setFixedWidth(330)
     window.show()
     sys.exit(app.exec_())
-    
