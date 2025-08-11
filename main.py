@@ -124,61 +124,58 @@ class mainApplication(QStackedWidget):
         tutorialPageButton.clicked.connect(lambda: self.setCurrentIndex(1))
         tutorialPageObj.button.clicked.connect(lambda: self.setCurrentIndex(0))
         board.gameOverSignal.connect(self.endGame)
-        board.toggleSignal_to_main.connect(self.togglePlayer)
+        board.buttonClicked.connect(self.handleButtonClicked)
         newGameButton.clicked.connect(self.newGame)
         self.darkThemeButton.clicked.connect(self.themeToggle)  
-    def togglePlayer(self):
+    def handleButtonClicked(self, buttonName, position):
+        # Toggle player and update UI
         self.restartable = True
-        if SingleButton.player == "O":
-            self.playerTurnLabel.setText("Player Turn: "+"X")
+        if SingleButton.player == "X":
+            SingleButton.player = "O"
+            self.playerTurnLabel.setText("Player Turn: O")
             self.playerTurnLabel.setStyleSheet("""
-                                    background-color: #D32F2F;
-                                    width:300px;
-                                    height:30px;
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                    border-radius: 5px;
-                                    border: 2px solid rgba(0,0,0,0.7);
-                                    """)
-        else:        
-            self.playerTurnLabel.setText("Player Turn: "+"O")
+                                        background-color: #1976D2;
+                                        width:300px;
+                                        height:30px;
+                                        font-size: 16px;
+                                        font-weight: bold;
+                                        border-radius: 5px;
+                                        border: 2px solid rgba(0,0,0,0.7);
+                                        """)
+        else:
+            SingleButton.player = "X"
+            self.playerTurnLabel.setText("Player Turn: X")
             self.playerTurnLabel.setStyleSheet("""
-                                    background-color: #1976D2;
-                                    width:300px;
-                                    height:30px;
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                    border-radius: 5px;
-                                    border: 2px solid rgba(0,0,0,0.7);
-                                    """)
+                                        background-color: #D32F2F;
+                                        width:300px;
+                                        height:30px;
+                                        font-size: 16px;
+                                        font-weight: bold;
+                                        border-radius: 5px;
+                                        border: 2px solid rgba(0,0,0,0.7);
+                                        """)
         ##D32F2F for X
         # #1976D2 for O
         
     def endGame(self):
-        # Remove all widgets from the main game page and show a winner label
-        
-        
-        # Toggle player to show the winner , as the winner is the one who just played
-        winner = SingleButton.player
-        if winner == "X":
-            winner = "O"
-        else: 
-            winner = "X"
+        # The winner is the player who just played (not the next player)
+        winner = "O" if SingleButton.player == "X" else "X"
+        print("hello")
         winner_label = QLabel(f"Winner: {winner}")
         winner_label.setAlignment(Qt.AlignCenter)
         winner_label.setStyleSheet("""
             background-color: #222;
             color: #FFD700;
-            font-size: 56px;
+            font-size: 48px;
             font-weight: bold;
             border-radius: 20px;
             border: 4px solid #FFD700;
-            padding: 80px 30px 80px 30px;
-            min-height: 400px;
+            padding: 30px;
         """)
         centralWidget = self.widget(0)
         layout = centralWidget.layout()
-        # Remove all widgets except those in the top row (row 0)
+        # Add the winner label to a new row at the bottom
+        row = layout.rowCount()
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             if item is not None:
@@ -188,8 +185,7 @@ class mainApplication(QStackedWidget):
                     widget = item.widget()
                     if widget is not None:
                         widget.setParent(None)
-        # Add the winner label to occupy the grid area (row 1, col 0, spanning all columns)
-        layout.addWidget(winner_label, 1, 0, 1, layout.columnCount())
+        layout.addWidget(winner_label, row, 0, 1, layout.columnCount())
     def newGame(self):
         # Check if the board has any played cells
         

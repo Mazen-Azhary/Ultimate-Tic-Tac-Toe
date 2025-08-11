@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QWidget,QPushButton,QGridLayout
+from PyQt5.QtWidgets import QApplication, QWidget,QGridLayout
 from PyQt5.QtCore import pyqtSignal
 import sys
 from singleButton import SingleButton
 class SingleBoard(QWidget):
     conqueredSignal = pyqtSignal(str)  # class attribute, correct PyQt usage
-    toggleSignal = pyqtSignal()
-    smallerBoardActivationSignal = pyqtSignal(int, int)  # Signal to Larger board activate a smaller board according to button press 
+    buttonClicked = pyqtSignal(str, str)  # buttonName, boardPosition
+    smallerBoardActivationSignal = pyqtSignal(int, int)  # Signal to Larger board activate a smaller board according to button press
     def __init__(self, Name="board00",boardPosition="01"): 
         super().__init__()
         self.boardName = Name
@@ -18,13 +18,17 @@ class SingleBoard(QWidget):
                 button = SingleButton(Name=f"{row}{col} ", position=boardPosition)
                 button.setFixedSize(100, 100)
                 layout.addWidget(button, row, col)
-                button.clickedSignal.connect(self.conquerButton)  # Connect the signal to the conquerButton method
+                button.buttonClicked.connect(self.handleButtonClicked)
         self.score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]]
         self.updateTheme()
         
     def isActive(self):
         return self.active
-    
+    def togglePlayer(self):
+        pass  # No longer used
+    def handleButtonClicked(self, buttonName, position):
+        self.conquerButton(buttonName, position)
+        self.buttonClicked.emit(buttonName, position)
     def setActive(self):
         if self.isActive():
             return
@@ -34,6 +38,7 @@ class SingleBoard(QWidget):
                 button = self.layout().itemAtPosition(i, j).widget()
                 button.clickable = True
                 button.active = True
+                
         self.updateTheme()
     def setInActive(self):
         if not self.isActive():
@@ -50,15 +55,15 @@ class SingleBoard(QWidget):
         from singleButton import THEME_DARK
         if self.active:
             if THEME_DARK:
-                self.setStyleSheet("background-color: #444; border: 3px solid #FFD700; border-radius: 8px;")
+                self.setStyleSheet("background-color: #444;font-size:40px;font-weight:bold; border: 3px solid #FFD700; border-radius: 8px;")
             else:
-                self.setStyleSheet("background-color: rgba(255,255,255,0.95); border: 2px solid #1976D2; border-radius: 5px;")
+                self.setStyleSheet("background-color: rgba(255,255,255,0.8);font-size:40px; border: 2px solid black;font-weight:bold; border-radius: 5px;")
         else:
             
             if THEME_DARK:
-                self.setStyleSheet("background-color: rgba(55,55,55,0.8); border: 2px solid black; border-radius: 5px;")
+                self.setStyleSheet("background-color: rgba(55,55,55,0.8);font-size:40px;font-weight:bold; border: 2px solid black; border-radius: 5px;")
             else:
-                self.setStyleSheet("background-color: rgba(200,200,200,0.7); border: 2px solid #888; border-radius: 5px;")
+                self.setStyleSheet("background-color: rgba(155,155,155,0.7);font-size:40px;font-weight:bold; border: 2px solid #888; border-radius: 5px;")
         for i in range(3):
             for j in range(3):
                 button = self.layout().itemAtPosition(i, j).widget()
@@ -76,7 +81,6 @@ class SingleBoard(QWidget):
             
         elif player=="O":
             self.score[x1][y1] = 0
-        self.toggleSignal.emit()
         if(self.checkForCompletion(x1,y1)):
             self.conqueredSignal.emit(position)
         return 0            
@@ -84,7 +88,9 @@ class SingleBoard(QWidget):
         checkValue = -1
         if SingleButton.player=="X":
             checkValue = 1
+            print("checking single board for x")
         elif SingleButton.player=="O":
+            print("checking single board for O")
             checkValue = 0
         else:
             return False

@@ -15,7 +15,7 @@ class LargerBoard(QWidget):
                 if board is not None:
                     board.updateTheme()
     gameOverSignal = pyqtSignal()  #game over 
-    toggleSignal_to_main = pyqtSignal()
+    buttonClicked = pyqtSignal(str, str)  # buttonName, boardPosition
     score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]] #each one of those is a smaller board on its own
     def __init__(self):
         super().__init__()    
@@ -50,9 +50,11 @@ class LargerBoard(QWidget):
                 layout.addWidget(board, rows, cols)
                 board.conqueredSignal.connect(self.conquerBoard) 
                 board.smallerBoardActivationSignal.connect(self.activateSmallerBoard)
-                board.toggleSignal.connect(self.togglePlayer)
+                board.buttonClicked.connect(self.handleButtonClicked)
     def togglePlayer(self):
-          self.toggleSignal_to_main.emit()  # Emit the signal to toggle player in main application
+        pass  # No longer used
+    def handleButtonClicked(self, buttonName, position):
+        self.buttonClicked.emit(buttonName, position)
     def conquerBoard(self,position="00"):
         # print(f"Board {boardName} conquered by {player}")
         #we need to hide the 9 buttons of the smaller board and create larger widget with label 
@@ -65,6 +67,11 @@ class LargerBoard(QWidget):
             for i in range(3):
                 for j in range(3):
                     btn = board.layout().itemAtPosition(i, j).widget()
+                    try:
+                        btn.clicked.disconnect()
+                    except Exception:
+                        pass
+                    btn.deleted = True
                     btn.hide()
             winner_label = QLabel()
             winner_label.setText(player)

@@ -7,6 +7,7 @@ THEME_DARK = False
 class SingleButton(QPushButton):
     toggleSignal = pyqtSignal()  # Signal to toggle player in main application
     clickedSignal = pyqtSignal(str, str, str)  # buttonPosInSingleBoard, boardPosition, player
+    buttonClicked = pyqtSignal(str, str)  # buttonPosInSingleBoard, boardPosition
     player = "X"  # static var to be shared among the 81 buttons
 
     def __init__(self, Name="btn00", position="00"):
@@ -17,6 +18,7 @@ class SingleButton(QPushButton):
         self.clickable = True
         self.active = True  # Track if the button is active (enabled for play)
         self.updateTheme()
+        self.deleted = False  # Track if the button is deleted/hidden
 
     def updateTheme(self):
         # Use self.active to determine style
@@ -90,20 +92,16 @@ class SingleButton(QPushButton):
         self.setStyleSheet(styleSh)
 
     def on_button_click(self):
+        if self.deleted:
+            return -1
         if self.clickable is False or self.text() != "":
             return -1
         self.clickable = False
-        if SingleButton.player == "X":
-            self.setText("X")
-        else:
-            self.setText("O")
+        self.setText(SingleButton.player)
         self.updateTheme()
-        self.clickedSignal.emit(self.buttonName, self.position, SingleButton.player)  # Emit the signal with the position
-        self.togglePlayer()  # Toggle the player after a successful click
+        self.buttonClicked.emit(self.buttonName, self.position)  # Only emit signal upward
 
     def togglePlayer(self):
-        if SingleButton.player == "X":
-            SingleButton.player = "O"
-        else:
-            SingleButton.player = "X"
-        self.toggleSignal.emit()
+        if self.deleted:
+            return
+        pass  # No longer used; toggling is handled only in main
