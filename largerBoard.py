@@ -8,6 +8,12 @@ from singleButton import SingleButton
 
 
 class LargerBoard(QWidget):
+    def updateTheme(self):
+        for row in range(3):
+            for col in range(3):
+                board = self.layout().itemAtPosition(row, col).widget()
+                if board is not None:
+                    board.updateTheme()
     gameOverSignal = pyqtSignal()  #game over 
     toggleSignal_to_main = pyqtSignal()
     score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]] #each one of those is a smaller board on its own
@@ -50,6 +56,7 @@ class LargerBoard(QWidget):
     def conquerBoard(self,position="00"):
         # print(f"Board {boardName} conquered by {player}")
         #we need to hide the 9 buttons of the smaller board and create larger widget with label 
+        from singleButton import THEME_DARK
         player = SingleButton.player
         x1 = int(position[0])
         y1 = int(position[1])
@@ -63,7 +70,10 @@ class LargerBoard(QWidget):
             winner_label.setText(player)
             winner_label.setAlignment(Qt.AlignCenter)
             LargerBoard.score[x1][y1] = 1 if player == "X" else 0
-            winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7);")
+            if THEME_DARK:
+                winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #FFD700; background-color: #222; border: 2px solid #FFD700; border-radius: 10px;")
+            else:
+                winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7); border: 2px solid #1976D2; border-radius: 10px;")
             board.layout().addWidget(winner_label, 0, 0, 3, 3)  # Span all 3x3 cells
         if(self.checkForCompletion(x1,y1)):
             self.gameOverSignal.emit()

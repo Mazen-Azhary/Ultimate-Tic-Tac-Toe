@@ -1,3 +1,4 @@
+import singleButton
 from PyQt5.QtWidgets import QStackedWidget,QApplication, QWidget,QGridLayout,QPushButton,QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
@@ -25,21 +26,21 @@ class mainApplication(QStackedWidget):
         
         # Create top control panel to store 2 buttons and label
         darkThemeWidget = QWidget()
-        darkThemeButton = QPushButton("🌙")
-        #darkThemeButton = QPushButton("☀️")
+        self.darkThemeButton = QPushButton("🌙")
+        #self.darkThemeButton = QPushButton("☀️")
         
-        # darkThemeButton.setStyleSheet("width:300px;font-size: 10px;font-weight: bold;")
+        # self.darkThemeButton.setStyleSheet("width:300px;font-size: 10px;font-weight: bold;")
         darkThemeLayout = QGridLayout()
         darkThemeLayout.setContentsMargins(0, 0, 0, 0)  
         darkThemeWidget.setLayout(darkThemeLayout)
         #i made an rgba border to add smooth transition for human eye between black and gray 
-        darkThemeButton.setStyleSheet("""background-color: #2C2C2C;
+        self.darkThemeButton.setStyleSheet("""background-color: #2C2C2C;
                                       border: 2px solid rgba(0,0,0,0.5);
                                       height:30px;
                                       border-radius: 5px;
                                       color:#FFD700
                                       """)
-        darkThemeWidget.layout().addWidget(darkThemeButton)
+        darkThemeWidget.layout().addWidget(self.darkThemeButton)
         
         newGameButton = QPushButton()        
         newGameWidget = QWidget()
@@ -124,7 +125,8 @@ class mainApplication(QStackedWidget):
         tutorialPageObj.button.clicked.connect(lambda: self.setCurrentIndex(0))
         board.gameOverSignal.connect(self.endGame)
         board.toggleSignal_to_main.connect(self.togglePlayer)
-        newGameButton.clicked.connect(self.newGame)  
+        newGameButton.clicked.connect(self.newGame)
+        self.darkThemeButton.clicked.connect(self.themeToggle)  
     def togglePlayer(self):
         self.restartable = True
         if SingleButton.player == "O":
@@ -230,6 +232,34 @@ class mainApplication(QStackedWidget):
         new_board.gameOverSignal.connect(self.endGame)
         new_board.toggleSignal_to_main.connect(self.togglePlayer)
         # print("New game started!")
+    def themeToggle(self):
+        # Toggle the theme between light and dark for the main window and all board buttons
+        singleButton.THEME_DARK = not singleButton.THEME_DARK
+        if singleButton.THEME_DARK:
+            self.setStyleSheet("background-color: #2C2C2C;")
+            self.darkThemeButton.setText("☀️")  # Change to sun icon for light theme
+        else:
+            self.setStyleSheet("background-color: gray;")
+            self.darkThemeButton.setText("🌙")  # Change to sun icon for light theme
+
+        # Get the current LargerBoard (row 1, col 0 in the main layout)
+        centralWidget = self.widget(0)
+        layout = centralWidget.layout()
+        board = None
+        for i in range(layout.count()):
+            item = layout.itemAt(i)
+            if item is not None:
+                pos = layout.getItemPosition(i)
+                row_idx = pos[0]
+                col_idx = pos[1] if len(pos) > 1 else None
+                if row_idx == 1 and (col_idx == 0 or col_idx is None):
+                    board = item.widget()
+                    break
+        if board is None:
+            return
+
+        board.updateTheme()
+        
 
 
         

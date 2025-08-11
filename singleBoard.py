@@ -9,45 +9,32 @@ class SingleBoard(QWidget):
     def __init__(self, Name="board00",boardPosition="01"): 
         super().__init__()
         self.boardName = Name
-        self.setStyleSheet("background-color: rgba(255,255,255,0.8);border: 2px solid black;border-radius: 5px;")
-        #use grid layout , learnt it in css3
         layout = QGridLayout()
         layout.setSpacing(3)
-        # layout.setContentsMargins(1, 1, 1, 1)
         self.setLayout(layout)
         self.active = True
-        
         for row in range(3):
             for col in range(3):
                 button = SingleButton(Name=f"{row}{col} ", position=boardPosition)
                 button.setFixedSize(100, 100)
                 layout.addWidget(button, row, col)
                 button.clickedSignal.connect(self.conquerButton)  # Connect the signal to the conquerButton method
-        self.score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]] #this will keep track of the score of this board , if we have 3 1's or 0's here we will signal for larger board to indicate this as conquered
+        self.score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]]
+        self.updateTheme()
         
     def isActive(self):
         return self.active
     
     def setActive(self):
-        if self.isActive()==True:
+        if self.isActive():
             return
         self.active = True
         for i in range(3):
             for j in range(3):
                 button = self.layout().itemAtPosition(i, j).widget()
                 button.clickable = True
-                button.setStyleSheet("""
-                    QPushButton {
-                        background-color: rgba(255,255,255,0.8);
-                        font-size:40px;
-                        font-weight:Bold;
-                        border: 2px solid black;
-                        border-radius: 5px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgba(155,155,155,0.7);
-                    }
-                """)
+                button.active = True
+        self.updateTheme()
     def setInActive(self):
         if not self.isActive():
             return
@@ -56,18 +43,26 @@ class SingleBoard(QWidget):
             for j in range(3):
                 button = self.layout().itemAtPosition(i, j).widget()
                 button.clickable = False
-                button.setStyleSheet("""
-                    QPushButton {
-                        background-color: rgba(55,55,55,0.8);
-                        font-size:40px;
-                        font-weight:Bold;
-                        border: 2px solid black;
-                        border-radius: 5px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgba(155,155,155,0.7);
-                    }
-                """)
+                button.active = False
+        self.updateTheme()
+    def updateTheme(self):
+        # Update board background based on active/inactive and theme
+        from singleButton import THEME_DARK
+        if self.active:
+            if THEME_DARK:
+                self.setStyleSheet("background-color: #444; border: 3px solid #FFD700; border-radius: 8px;")
+            else:
+                self.setStyleSheet("background-color: rgba(255,255,255,0.95); border: 2px solid #1976D2; border-radius: 5px;")
+        else:
+            
+            if THEME_DARK:
+                self.setStyleSheet("background-color: rgba(55,55,55,0.8); border: 2px solid black; border-radius: 5px;")
+            else:
+                self.setStyleSheet("background-color: rgba(200,200,200,0.7); border: 2px solid #888; border-radius: 5px;")
+        for i in range(3):
+            for j in range(3):
+                button = self.layout().itemAtPosition(i, j).widget()
+                button.updateTheme()
                 
     def conquerButton(self,buttonName="btn00",position="00"):
         self.setInActive()
