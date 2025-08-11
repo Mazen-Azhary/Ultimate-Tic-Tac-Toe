@@ -28,7 +28,10 @@ class SingleBoard(QWidget):
         pass  # No longer used
     def handleButtonClicked(self, buttonName, position):
         self.conquerButton(buttonName, position)
-        self.buttonClicked.emit(buttonName, position)
+        try:
+            self.buttonClicked.emit(buttonName, position)
+        except RuntimeError:
+            pass  # Ignore if the object is already deleted
     def setActive(self):
         if self.isActive():
             return
@@ -88,9 +91,9 @@ class SingleBoard(QWidget):
         checkValue = -1
         if SingleButton.player=="X":
             checkValue = 1
-            print("checking single board for x")
+            # print("checking single board for x")
         elif SingleButton.player=="O":
-            print("checking single board for O")
+            # print("checking single board for O")
             checkValue = 0
         else:
             return False
@@ -101,11 +104,13 @@ class SingleBoard(QWidget):
         #check for complete col 
         elif self.score[0][y1] == checkValue and self.score[1][y1] == checkValue and self.score[2][y1] == checkValue:
                 return True
-        #check for complete diagonal
-        elif x1==y1:
-            condition1 = (self.score[0][0] == checkValue and self.score[1][1] == checkValue and self.score[2][2] == checkValue)
-            condition2 = self.score[0][2] == checkValue and self.score[1][1] == checkValue and self.score[2][0] == checkValue  
-            if condition1 or condition2:
+        # check main diagonal
+        elif x1 == y1:
+            if self.score[0][0] == checkValue and self.score[1][1] == checkValue and self.score[2][2] == checkValue:
+                return True
+        # check anti-diagonal
+        elif x1 + y1 == 2:
+            if self.score[0][2] == checkValue and self.score[1][1] == checkValue and self.score[2][0] == checkValue:
                 return True
         # print("hehehe")
         return False

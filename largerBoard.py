@@ -72,6 +72,7 @@ class LargerBoard(QWidget):
                     except Exception:
                         pass
                     btn.deleted = True
+                    btn.clickable = False
                     btn.hide()
             winner_label = QLabel()
             winner_label.setText(player)
@@ -94,16 +95,18 @@ class LargerBoard(QWidget):
             return False
 
         #check for complete row
-        if LargerBoard.score[x1][0] == checkValue and LargerBoard.score[x1][1] == checkValue and LargerBoard.score[x1][2] == checkValue:
+        if self.score[x1][0] == checkValue and self.score[x1][1] == checkValue and self.score[x1][2] == checkValue:
                 return True
-        #check for complete col
-        elif LargerBoard.score[0][y1] == checkValue and LargerBoard.score[1][y1] == checkValue and LargerBoard.score[2][y1] == checkValue:
+        #check for complete col 
+        elif self.score[0][y1] == checkValue and self.score[1][y1] == checkValue and self.score[2][y1] == checkValue:
                 return True
-        #check for diagonal
-        elif x1==y1:
-            condition1 = (LargerBoard.score[0][0] == checkValue and LargerBoard.score[1][1] == checkValue and LargerBoard.score[2][2] == checkValue)
-            condition2 = LargerBoard.score[0][2] == checkValue and LargerBoard.score[1][1] == checkValue and LargerBoard.score[2][0] == checkValue
-            if condition1 or condition2:
+        # check main diagonal
+        elif x1 == y1:
+            if self.score[0][0] == checkValue and self.score[1][1] == checkValue and self.score[2][2] == checkValue:
+                return True
+        # check anti-diagonal
+        elif x1 + y1 == 2:
+            if self.score[0][2] == checkValue and self.score[1][1] == checkValue and self.score[2][0] == checkValue:
                 return True
         return False
 
@@ -125,13 +128,27 @@ class LargerBoard(QWidget):
             return
         # If the board is not conquered, we need to activate it and deactivate all others
         for row in range(3):
+            for col in range(3):
+                if row == x and col == y:
+                    board = self.layout().itemAtPosition(x, y).widget()
+                    board.setActive()                       
+                    continue
+                board = self.layout().itemAtPosition(row, col).widget()
+                board.setInActive()
+        # Fallback: if no boards are active and there are unconquered boards, activate all unconquered boards
+        any_active = False
+        for row in range(3):
+            for col in range(3):
+                board = self.layout().itemAtPosition(row, col).widget()
+                if board.isActive():
+                    any_active = True
+                    break
+        if not any_active:
+            for row in range(3):
                 for col in range(3):
-                    if row == x and col == y:
-                        board = self.layout().itemAtPosition(x, y).widget()
-                        board.setActive()                       
-                        continue
-                    board = self.layout().itemAtPosition(row, col).widget()
-                    board.setInActive()
+                    if LargerBoard.score[row][col] == -1:
+                        board = self.layout().itemAtPosition(row, col).widget()
+                        board.setActive()
                     
             
 

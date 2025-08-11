@@ -14,7 +14,7 @@ class mainApplication(QStackedWidget):
         super().__init__()
         self.setFixedHeight(1000)
         self.setFixedWidth(1000)
-        
+        self.gameEnded = False
         self.setStyleSheet("background-color: gray;")
         self.restartable = False
         # Create the main game page as a central widget
@@ -127,7 +127,7 @@ class mainApplication(QStackedWidget):
         board.buttonClicked.connect(self.handleButtonClicked)
         newGameButton.clicked.connect(self.newGame)
         self.darkThemeButton.clicked.connect(self.themeToggle)  
-    def handleButtonClicked(self, buttonName, position):
+    def handleButtonClicked(self):
         # Toggle player and update UI
         self.restartable = True
         if SingleButton.player == "X":
@@ -159,8 +159,9 @@ class mainApplication(QStackedWidget):
         
     def endGame(self):
         # The winner is the player who just played (not the next player)
-        winner = "O" if SingleButton.player == "X" else "X"
-        print("hello")
+        winner = "O" if SingleButton.player == "O" else "X"
+        # print("hello")
+        self.gameEnded = True
         winner_label = QLabel(f"Winner: {winner}")
         winner_label.setAlignment(Qt.AlignCenter)
         winner_label.setStyleSheet("""
@@ -174,18 +175,19 @@ class mainApplication(QStackedWidget):
         """)
         centralWidget = self.widget(0)
         layout = centralWidget.layout()
-        # Add the winner label to a new row at the bottom
-        row = layout.rowCount()
+        # Remove the board widget and place the winner label in its place (row 1, col 0)
+        board_row, board_col = 1, 0
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             if item is not None:
                 pos = layout.getItemPosition(i)
                 row_idx = pos[0]
-                if row_idx != 0:
+                col_idx = pos[1] if len(pos) > 1 else None
+                if row_idx == board_row and (col_idx == board_col or col_idx is None):
                     widget = item.widget()
                     if widget is not None:
                         widget.setParent(None)
-        layout.addWidget(winner_label, row, 0, 1, layout.columnCount())
+        layout.addWidget(winner_label, board_row, board_col)
     def newGame(self):
         # Check if the board has any played cells
         
@@ -222,13 +224,15 @@ class mainApplication(QStackedWidget):
                                     border: 2px solid rgba(0,0,0,0.7);
                                     """)
 
-        # Create and add a new LargerBoard
+    # Create and add a new LargerBoard
         new_board = LargerBoard()
         layout.addWidget(new_board, 1, 0)
         new_board.gameOverSignal.connect(self.endGame)
-        new_board.toggleSignal_to_main.connect(self.togglePlayer)
+        new_board.buttonClicked.connect(self.handleButtonClicked)
         # print("New game started!")
     def themeToggle(self):
+        if self.gameEnded:
+            return
         # Toggle the theme between light and dark for the main window and all board buttons
         singleButton.THEME_DARK = not singleButton.THEME_DARK
         if singleButton.THEME_DARK:
