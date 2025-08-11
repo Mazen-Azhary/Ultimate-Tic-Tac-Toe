@@ -35,7 +35,18 @@ class SingleBoard(QWidget):
             for j in range(3):
                 button = self.layout().itemAtPosition(i, j).widget()
                 button.clickable = True
-        self.setStyleSheet("background-color: rgba(255,255,255,0.8);border: 2px solid black;border-radius: 5px;")
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: rgba(255,255,255,0.8);
+                        font-size:40px;
+                        font-weight:Bold;
+                        border: 2px solid black;
+                        border-radius: 5px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgba(155,155,155,0.7);
+                    }
+                """)
     def setInActive(self):
         if not self.isActive():
             return
@@ -44,7 +55,19 @@ class SingleBoard(QWidget):
             for j in range(3):
                 button = self.layout().itemAtPosition(i, j).widget()
                 button.clickable = False
-        self.setStyleSheet("background-color: rgba(155,155,155,0.8);border: 2px solid black;border-radius: 5px;")
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: rgba(55,55,55,0.8);
+                        font-size:40px;
+                        font-weight:Bold;
+                        border: 2px solid black;
+                        border-radius: 5px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgba(155,155,155,0.7);
+                    }
+                """)
+                
     def conquerButton(self,buttonName="btn00",position="00",player="X"):
         self.setInActive()
         buttonName = buttonName.strip() #faced a problem with whitespace 

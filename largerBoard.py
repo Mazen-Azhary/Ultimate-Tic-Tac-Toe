@@ -55,26 +55,36 @@ class LargerBoard(QWidget):
             winner_label = QLabel()
             winner_label.setText(player)
             winner_label.setAlignment(Qt.AlignCenter)
+            self.score[x1][y1] = 1 if player == "X" else 0
             winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7);")
             board.layout().addWidget(winner_label, 0, 0, 3, 3)  # Span all 3x3 cells
 
     def activateSmallerBoard(self, x, y):
-        #activate smaller board with position of pressed button , deactivate all others , if it's already inactive i handled it to return directly
-        print("hello")
-        print(x,y)
-        activeStyleSheet =  "background-color: rgba(255,255,255,0.8);border: 2px solid black;border-radius: 5px;"
-        inActiveStyleSheet = "background-color: rgba(55,55,55,0.8);border: 2px solid black;border-radius: 5px;"
+        """activate smaller board with position of pressed button , deactivate all others , if it's already 
+        inactive i handled it to return directly
+        if it's already active i handled it to return directly
+        and if it is complete then we allow all others to be active
+        """
+        # print("hello")
+        if self.score[x][y] != -1:  # If the board is already conquered
+            for row in range(3):
+                for col in range(3):
+                    board = self.layout().itemAtPosition(row, col).widget()
+                    if self.score[row][col] == -1:
+                        board.setActive()
+                    else:
+                        board.setInActive()
+            return
+        # If the board is not conquered, we need to activate it and deactivate all others
         for row in range(3):
                 for col in range(3):
                     if row == x and col == y:
                         board = self.layout().itemAtPosition(x, y).widget()
-                        board.setActive()
-                        board.setStyleSheet(activeStyleSheet)
-                        
+                        board.setActive()                       
                         continue
                     board = self.layout().itemAtPosition(row, col).widget()
                     board.setInActive()
-                    board.setStyleSheet(inActiveStyleSheet)
+                    
             
 
 if __name__ == "__main__":
