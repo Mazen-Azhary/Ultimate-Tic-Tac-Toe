@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import QApplication, QWidget,QGridLayout,QLabel
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,pyqtSignal
 import sys
 from singleBoard import SingleBoard
 from singleButton import SingleButton
 
 
 class LargerBoard(QWidget):
+    gameOverSignal = pyqtSignal()  #game over 
     def __init__(self):
         super().__init__()    
         StyleSH = """background-color: gray;"""
@@ -60,6 +61,30 @@ class LargerBoard(QWidget):
             self.score[x1][y1] = 1 if player == "X" else 0
             winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7);")
             board.layout().addWidget(winner_label, 0, 0, 3, 3)  # Span all 3x3 cells
+        if(self.checkForCompletion(x1,y1)):
+            self.gameOverSignal.emit()
+    def checkForCompletion(self,x1,y1):
+        checkValue = -1
+        if SingleButton.player=="X":
+            checkValue = 1
+        elif SingleButton.player=="O":
+            checkValue = 0
+        else:
+            return False
+
+        #check for complete row
+        if self.score[x1][0] == checkValue and self.score[x1][1] == checkValue and self.score[x1][2] == checkValue:
+                return True
+        #check for complete col
+        elif self.score[0][y1] == checkValue and self.score[1][y1] == checkValue and self.score[2][y1] == checkValue:
+                return True
+        #check for diagonal
+        elif x1==y1:
+            condition1 = (self.score[0][0] == checkValue and self.score[1][1] == checkValue and self.score[2][2] == checkValue)
+            condition2 = self.score[0][2] == checkValue and self.score[1][1] == checkValue and self.score[2][0] == checkValue
+            if condition1 or condition2:
+                return True
+        return False
 
     def activateSmallerBoard(self, x, y):
         """activate smaller board with position of pressed button , deactivate all others , if it's already 

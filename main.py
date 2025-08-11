@@ -120,6 +120,35 @@ class mainApplication(QStackedWidget):
         
         tutorialPageButton.clicked.connect(lambda: self.setCurrentIndex(1))
         tutorialPageObj.button.clicked.connect(lambda: self.setCurrentIndex(0))
+        board.gameOverSignal.connect(self.endGame)
+    def endGame(self):
+        # Remove all widgets from the main game page and show a winner label
+        
+        
+        # Toggle player to show the winner , as the winner is the one who just played
+        winner = SingleButton.player
+        if winner == "X":
+            winner = "O"
+        else: 
+            winner = "X"
+        winner_label = QLabel(f"Winner: {winner}")
+        winner_label.setAlignment(Qt.AlignCenter)
+        winner_label.setStyleSheet("""
+            background-color: #222;
+            color: #FFD700;
+            font-size: 48px;
+            font-weight: bold;
+            border-radius: 20px;
+            border: 4px solid #FFD700;
+            padding: 30px;
+        """)
+        centralWidget = self.widget(0)
+        layout = centralWidget.layout()
+        # Add the winner label to a new row at the bottom
+        row = layout.rowCount()
+        layout.addWidget(winner_label, row, 0, 1, layout.columnCount())
+        
+        
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
