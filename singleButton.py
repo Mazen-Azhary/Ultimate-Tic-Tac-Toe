@@ -5,6 +5,7 @@ import sys
 
 
 class SingleButton(QPushButton):
+    toggleSignal = pyqtSignal()  # Signal to toggle player in main application
     clickedSignal = pyqtSignal(str,str,str) #buttonPosInSingleBoard,boardPosition,player
     player = "X" #this is a static var to be shared among the 81 buttons 
     def __init__(self,Name="btn00",position="00"): #btn00 in position 00 means it is top left button in top left singleBoard
@@ -62,6 +63,7 @@ class SingleButton(QPushButton):
             SingleButton.player = "O"
         else:
             SingleButton.player = "X"
+        self.toggleSignal.emit()  # Emit the signal to toggle player in main application
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

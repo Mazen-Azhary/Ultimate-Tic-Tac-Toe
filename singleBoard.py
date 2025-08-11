@@ -4,6 +4,7 @@ import sys
 from singleButton import SingleButton
 class SingleBoard(QWidget):
     conqueredSignal = pyqtSignal(str)  # class attribute, correct PyQt usage
+    toggleSignal = pyqtSignal()
     smallerBoardActivationSignal = pyqtSignal(int, int)  # Signal to Larger board activate a smaller board according to button press 
     def __init__(self, Name="board00",boardPosition="01"): 
         super().__init__()
@@ -80,7 +81,7 @@ class SingleBoard(QWidget):
             
         elif player=="O":
             self.score[x1][y1] = 0
-            
+        self.toggleSignal.emit()
         if(self.checkForCompletion(x1,y1)):
             self.conqueredSignal.emit(position)
         return 0            

@@ -99,7 +99,7 @@ in the images.
 
 This rule creates deeper planning and adds a layer of strategy to the game.  
 The goal is to win three small boards in a row on the larger grid.
-</string>
+Game is restartable if there is at least one unempty grid</string>
    </property>
   </widget>
   <widget class="QLabel" name="gameWinLabel">

@@ -3,17 +3,19 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import sys
 from largerBoard import LargerBoard
+
 from singleButton import SingleButton #to use player static var
 from tutorialPage import tutorialPage
 
 class mainApplication(QStackedWidget):
+    
     def __init__(self):
         super().__init__()
         self.setFixedHeight(1000)
         self.setFixedWidth(1000)
         
         self.setStyleSheet("background-color: gray;")
-        
+        self.restartable = False
         # Create the main game page as a central widget
         centralWidget = QWidget()
         layout = QGridLayout()
@@ -60,9 +62,9 @@ class mainApplication(QStackedWidget):
         playerTurnLayout = QGridLayout()
         playerTurnLayout.setContentsMargins(0, 0, 0, 0)  
         playerTurnWidget.setLayout(playerTurnLayout)
-        playerTurnLabel = QLabel("Player Turn: "+SingleButton.player)
-        playerTurnLabel.setAlignment(Qt.AlignCenter)  # tried text align centre but it didn't work
-        playerTurnLabel.setStyleSheet("""
+        self.playerTurnLabel = QLabel("Player Turn: "+SingleButton.player)
+        self.playerTurnLabel.setAlignment(Qt.AlignCenter)  # tried text align centre but it didn't work
+        self.playerTurnLabel.setStyleSheet("""
                                     background-color: #D32F2F;
                                     width:300px;
                                     height:30px;
@@ -73,7 +75,7 @@ class mainApplication(QStackedWidget):
                                     """)
         ##D32F2F for X
         # #1976D2 for O
-        playerTurnWidget.layout().addWidget(playerTurnLabel)
+        playerTurnWidget.layout().addWidget(self.playerTurnLabel)
         
         
         tutorialPageButton = QPushButton("How to Play")
@@ -121,6 +123,35 @@ class mainApplication(QStackedWidget):
         tutorialPageButton.clicked.connect(lambda: self.setCurrentIndex(1))
         tutorialPageObj.button.clicked.connect(lambda: self.setCurrentIndex(0))
         board.gameOverSignal.connect(self.endGame)
+        board.toggleSignal_to_main.connect(self.togglePlayer)
+        newGameButton.clicked.connect(self.newGame)  
+    def togglePlayer(self):
+        self.restartable = True
+        if SingleButton.player == "O":
+            self.playerTurnLabel.setText("Player Turn: "+"X")
+            self.playerTurnLabel.setStyleSheet("""
+                                    background-color: #D32F2F;
+                                    width:300px;
+                                    height:30px;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    border-radius: 5px;
+                                    border: 2px solid rgba(0,0,0,0.7);
+                                    """)
+        else:        
+            self.playerTurnLabel.setText("Player Turn: "+"O")
+            self.playerTurnLabel.setStyleSheet("""
+                                    background-color: #1976D2;
+                                    width:300px;
+                                    height:30px;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    border-radius: 5px;
+                                    border: 2px solid rgba(0,0,0,0.7);
+                                    """)
+        ##D32F2F for X
+        # #1976D2 for O
+        
     def endGame(self):
         # Remove all widgets from the main game page and show a winner label
         
@@ -136,18 +167,71 @@ class mainApplication(QStackedWidget):
         winner_label.setStyleSheet("""
             background-color: #222;
             color: #FFD700;
-            font-size: 48px;
+            font-size: 56px;
             font-weight: bold;
             border-radius: 20px;
             border: 4px solid #FFD700;
-            padding: 30px;
+            padding: 80px 30px 80px 30px;
+            min-height: 400px;
         """)
         centralWidget = self.widget(0)
         layout = centralWidget.layout()
-        # Add the winner label to a new row at the bottom
-        row = layout.rowCount()
-        layout.addWidget(winner_label, row, 0, 1, layout.columnCount())
+        # Remove all widgets except those in the top row (row 0)
+        for i in reversed(range(layout.count())):
+            item = layout.itemAt(i)
+            if item is not None:
+                pos = layout.getItemPosition(i)
+                row_idx = pos[0]
+                if row_idx != 0:
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.setParent(None)
+        # Add the winner label to occupy the grid area (row 1, col 0, spanning all columns)
+        layout.addWidget(winner_label, 1, 0, 1, layout.columnCount())
+    def newGame(self):
+        # Check if the board has any played cells
         
+        if not self.restartable:
+            # print("Game has just started, nothing to reset.")
+            return
+
+        # Remove the current LargerBoard from the layout
+        centralWidget = self.widget(0)
+        layout = centralWidget.layout()
+        for i in reversed(range(layout.count())):
+            item = layout.itemAt(i)
+            if item is not None:
+                pos = layout.getItemPosition(i)
+                row_idx = pos[0]
+                col_idx = pos[1] if len(pos) > 1 else None
+                if row_idx == 1 and (col_idx == 0 or col_idx is None):
+                    widget = item.widget()
+                    if widget is not None:
+                        widget.setParent(None)
+                        widget.deleteLater()
+
+        # Reset static variables
+        LargerBoard.score = [[-1 for _ in range(3)] for _ in range(3)]
+        SingleButton.player = "X"
+        self.playerTurnLabel.setText("Player Turn: X")
+        self.playerTurnLabel.setStyleSheet("""
+                                    background-color: #D32F2F;
+                                    width:300px;
+                                    height:30px;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    border-radius: 5px;
+                                    border: 2px solid rgba(0,0,0,0.7);
+                                    """)
+
+        # Create and add a new LargerBoard
+        new_board = LargerBoard()
+        layout.addWidget(new_board, 1, 0)
+        new_board.gameOverSignal.connect(self.endGame)
+        new_board.toggleSignal_to_main.connect(self.togglePlayer)
+        # print("New game started!")
+
+
         
         
 if __name__ == "__main__":
