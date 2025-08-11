@@ -9,11 +9,18 @@ from singleButton import SingleButton
 
 class LargerBoard(QWidget):
     def updateTheme(self):
+        from singleButton import THEME_DARK
         for row in range(3):
             for col in range(3):
                 board = self.layout().itemAtPosition(row, col).widget()
                 if board is not None:
                     board.updateTheme()
+                if self.winner_labels[row][col] is not None:
+                    winner_label = self.winner_labels[row][col]
+                    if THEME_DARK:
+                        winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #FFD700; background-color: #222; border: 2px solid #FFD700; border-radius: 10px;")
+                    else:
+                        winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7); border: 2px solid #1976D2; border-radius: 10px;")
     gameOverSignal = pyqtSignal()  #game over 
     buttonClicked = pyqtSignal(str, str)  # buttonName, boardPosition
     score = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]] #each one of those is a smaller board on its own
@@ -25,6 +32,7 @@ class LargerBoard(QWidget):
         self.setStyleSheet(StyleSH)
         self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+        self.winner_labels = [[None for _ in range(3)] for _ in range(3)]
         for rows in range(3):
             for cols in range(3):
                 board = SingleBoard(f"board{rows}{cols}",f"{rows}{cols}")
@@ -45,7 +53,6 @@ class LargerBoard(QWidget):
                     StyleSH += "border-left: 2px solid black;"
                 else:
                     StyleSH += "border-left: 2px solid black;"
-                
                 board.setStyleSheet(StyleSH)       
                 layout.addWidget(board, rows, cols)
                 board.conqueredSignal.connect(self.conquerBoard) 
@@ -83,6 +90,7 @@ class LargerBoard(QWidget):
             else:
                 winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7); border: 2px solid #1976D2; border-radius: 10px;")
             board.layout().addWidget(winner_label, 0, 0, 3, 3)  # Span all 3x3 cells
+            self.winner_labels[x1][y1] = winner_label
         if(self.checkForCompletion(x1,y1)):
             self.gameOverSignal.emit()
     def checkForCompletion(self,x1,y1):
