@@ -1,3 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+dist/
 .qodo
 .dist
-__pycache__
+.vscode/
+.idea/

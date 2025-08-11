@@ -143,15 +143,16 @@ class LargerBoard(QWidget):
                     continue
                 board = self.layout().itemAtPosition(row, col).widget()
                 board.setInActive()
-        # Fallback: if no boards are active and there are unconquered boards, activate all unconquered boards
-        any_active = False
+        # Fallback: if no unconquered board is active, activate all unconquered boards
+        any_unconquered_active = False
         for row in range(3):
             for col in range(3):
-                board = self.layout().itemAtPosition(row, col).widget()
-                if board.isActive():
-                    any_active = True
-                    break
-        if not any_active:
+                if LargerBoard.score[row][col] == -1:
+                    board = self.layout().itemAtPosition(row, col).widget()
+                    if board.isActive():
+                        any_unconquered_active = True
+                        break
+        if not any_unconquered_active:
             for row in range(3):
                 for col in range(3):
                     if LargerBoard.score[row][col] == -1:
