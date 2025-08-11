@@ -20,6 +20,7 @@ class LargerBoard(QWidget):
             for cols in range(3):
                 board = SingleBoard(f"board{rows}{cols}",f"{rows}{cols}")
                 board.setFixedSize(310, 310)
+                board.setActive()
                 StyleSH = board.styleSheet()
                 if rows==0:
                     StyleSH += "border-bottom: 2px solid black;"
@@ -39,6 +40,7 @@ class LargerBoard(QWidget):
                 board.setStyleSheet(StyleSH)       
                 layout.addWidget(board, rows, cols)
                 board.conqueredSignal.connect(self.conquerBoard) 
+                board.smallerBoardActivationSignal.connect(self.activateSmallerBoard)  
     def conquerBoard(self,position="00",player="X"):
         # print(f"Board {boardName} conquered by {player}")
         #we need to hide the 9 buttons of the smaller board and create larger widget with label 
@@ -55,6 +57,25 @@ class LargerBoard(QWidget):
             winner_label.setAlignment(Qt.AlignCenter)
             winner_label.setStyleSheet("font-size: 72px; font-weight: bold; color: #222; background-color: rgba(155,155,155,0.7);")
             board.layout().addWidget(winner_label, 0, 0, 3, 3)  # Span all 3x3 cells
+
+    def activateSmallerBoard(self, x, y):
+        #activate smaller board with position of pressed button , deactivate all others , if it's already inactive i handled it to return directly
+        print("hello")
+        print(x,y)
+        activeStyleSheet =  "background-color: rgba(255,255,255,0.8);border: 2px solid black;border-radius: 5px;"
+        inActiveStyleSheet = "background-color: rgba(55,55,55,0.8);border: 2px solid black;border-radius: 5px;"
+        for row in range(3):
+                for col in range(3):
+                    if row == x and col == y:
+                        board = self.layout().itemAtPosition(x, y).widget()
+                        board.setActive()
+                        board.setStyleSheet(activeStyleSheet)
+                        
+                        continue
+                    board = self.layout().itemAtPosition(row, col).widget()
+                    board.setInActive()
+                    board.setStyleSheet(inActiveStyleSheet)
+            
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

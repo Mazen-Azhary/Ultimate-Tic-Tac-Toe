@@ -5,12 +5,13 @@ import sys
 
 
 class SingleButton(QPushButton):
-    def __init__(self,Name="btn00",position="00",parent=None): #btn00 in position 00 means it is top left button in top left singleBoard
-        self.clickedSignal = pyqtSignal(str)
+    clickedSignal = pyqtSignal(str,str,str) #buttonPosInSingleBoard,boardPosition,player
+    
+    def __init__(self,Name="btn00",position="00"): #btn00 in position 00 means it is top left button in top left singleBoard
         super().__init__()
         self.position = position
         self.buttonName = Name
-        self.clicked.connect(self.on_button_click)
+        self.clicked.connect(lambda: self.on_button_click(player="X"))
         self.clickable = True
         # self.setFixedHeight(60)
         # self.setFixedWidth(60)
@@ -30,7 +31,6 @@ class SingleButton(QPushButton):
             """
         self.setStyleSheet(styleSh)  
     def on_button_click(self,player="X"):
-        
         if self.clickable == False or self.text() != "":
             return -1    
         self.clickable = False
@@ -53,11 +53,13 @@ class SingleButton(QPushButton):
             """
         self.setStyleSheet(styleSh)
         # return self.position
-        self.clickedSignal.emit(self.position,player)  # Emit the signal with the position
+
+
+        self.clickedSignal.emit(self.buttonName, self.position, player)  # Emit the signal with the position
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = SingleButton("TestButton", "01")
+    window = SingleButton("btn00", "01")
     window.setFixedHeight(100)
     window.setFixedWidth(100)
     window.show()
