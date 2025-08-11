@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 import sys
 from singleButton import SingleButton
 class SingleBoard(QWidget):
-    conqueredSignal = pyqtSignal(str, str)  # class attribute, correct PyQt usage
+    conqueredSignal = pyqtSignal(str)  # class attribute, correct PyQt usage
     smallerBoardActivationSignal = pyqtSignal(int, int)  # Signal to Larger board activate a smaller board according to button press 
     def __init__(self, Name="board00",boardPosition="01"): 
         super().__init__()
@@ -18,7 +18,7 @@ class SingleBoard(QWidget):
         
         for row in range(3):
             for col in range(3):
-                button = SingleButton(Name=f"btn{row}{col} ", position=boardPosition)
+                button = SingleButton(Name=f"{row}{col} ", position=boardPosition)
                 button.setFixedSize(100, 100)
                 layout.addWidget(button, row, col)
                 button.clickedSignal.connect(self.conquerButton)  # Connect the signal to the conquerButton method
@@ -68,29 +68,31 @@ class SingleBoard(QWidget):
                     }
                 """)
                 
-    def conquerButton(self,buttonName="btn00",position="00",player="X"):
+    def conquerButton(self,buttonName="btn00",position="00"):
         self.setInActive()
         buttonName = buttonName.strip() #faced a problem with whitespace 
         x1 = int(buttonName[-2])
         y1 = int(buttonName[-1])
         self.smallerBoardActivationSignal.emit(x1,y1) #send to larger board        
+        player = SingleButton.player
         if player=="X":
             self.score[x1][y1] = 1
+            
         elif player=="O":
             self.score[x1][y1] = 0
-        if(self.checkForCompletion(player,position)):
-            self.conqueredSignal.emit(position, player)
+            
+        if(self.checkForCompletion(x1,y1)):
+            self.conqueredSignal.emit(position)
         return 0            
-    def checkForCompletion(self,player="X",position="00"):
+    def checkForCompletion(self,x1,y1):
         checkValue = -1
-        if player=="X":
+        if SingleButton.player=="X":
             checkValue = 1
-        elif player=="O":
+        elif SingleButton.player=="O":
             checkValue = 0
         else:
             return False
-        x1 = int(position[0])
-        y1 = int(position[1])
+        
         #check for complete row
         if self.score[x1][0] == checkValue and self.score[x1][1] == checkValue and self.score[x1][2] == checkValue:
                 return True

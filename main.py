@@ -3,8 +3,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import sys
 from largerBoard import LargerBoard
+from singleButton import SingleButton #to use player static var
 from tutorialPage import tutorialPage
-
 
 class mainApplication(QStackedWidget):
     def __init__(self):
@@ -60,7 +60,7 @@ class mainApplication(QStackedWidget):
         playerTurnLayout = QGridLayout()
         playerTurnLayout.setContentsMargins(0, 0, 0, 0)  
         playerTurnWidget.setLayout(playerTurnLayout)
-        playerTurnLabel = QLabel("Player Turn: X")
+        playerTurnLabel = QLabel("Player Turn: "+SingleButton.player)
         playerTurnLabel.setAlignment(Qt.AlignCenter)  # tried text align centre but it didn't work
         playerTurnLabel.setStyleSheet("""
                                     background-color: #D32F2F;

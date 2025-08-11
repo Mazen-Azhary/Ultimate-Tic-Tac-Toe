@@ -4,6 +4,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import sys
 from singleBoard import SingleBoard
+from singleButton import SingleButton
 
 
 class LargerBoard(QWidget):
@@ -41,9 +42,10 @@ class LargerBoard(QWidget):
                 layout.addWidget(board, rows, cols)
                 board.conqueredSignal.connect(self.conquerBoard) 
                 board.smallerBoardActivationSignal.connect(self.activateSmallerBoard)  
-    def conquerBoard(self,position="00",player="X"):
+    def conquerBoard(self,position="00"):
         # print(f"Board {boardName} conquered by {player}")
         #we need to hide the 9 buttons of the smaller board and create larger widget with label 
+        player = SingleButton.player
         x1 = int(position[0])
         y1 = int(position[1])
         board = self.layout().itemAtPosition(x1,y1).widget()
